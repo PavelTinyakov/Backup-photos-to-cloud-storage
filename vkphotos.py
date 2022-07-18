@@ -1,6 +1,7 @@
-import requests
 from datetime import datetime
 import re
+
+import requests
 
 
 class VkPhotos:
@@ -9,11 +10,11 @@ class VkPhotos:
     def __init__(self, token: str):
         self.base_params = {'access_token': token, 'v': '5.131'}
 
-    def _get_photos_info(self, owner_id: int, count: int = 5) -> dict:
+    def _get_photos_info(self, owner_id: int, count: int, album_id: str) -> dict:
         url = self._base_url + 'photos.get'
         params = {
             'owner_id': owner_id,
-            'album_id': 'profile',
+            'album_id': album_id,
             'photo_sizes': 1,
             'extended': 1,
             'count': count
@@ -25,8 +26,8 @@ class VkPhotos:
             raise Exception(f'Error code {photos_info["error"]["error_code"]} -> {photos_info["error"]["error_msg"]}')
         return photos_info
 
-    def get_max_size_photos(self, owner_id: int, count: int) -> list[dict]:
-        photos_info = self._get_photos_info(owner_id, count)
+    def get_max_size_photos(self, owner_id: int, count: int, album_id: str) -> list[dict]:
+        photos_info = self._get_photos_info(owner_id, count, album_id)
         size_type = ('w', 'z', 'y', 'r', 'q', 'p', 'o', 'x', 'm', 's')
         owner_photos = []
         for photo in photos_info['response']['items']:
@@ -36,7 +37,7 @@ class VkPhotos:
                     owner_photos.append({
                         'file_name': self.generate_file_name(photo, owner_photos, filter_photo[0]['url']),
                         'size': filter_photo[0]['type'],
-                        'url': filter_photo[0]['url']
+                        'origin_url': filter_photo[0]['url']
                     })
                     break
         return owner_photos
