@@ -16,9 +16,9 @@ class YandexDisk:
             'Authorization': f'OAuth {self.token}'
         }
 
-    def _create_folder(self, vk_owner_id: int) -> str:
+    def _create_folder(self, vk_owner_id: int, ya_base_folder: str) -> str:
         url = self._base_url + 'resources'
-        base_folder = '/VK_photos_upload'
+        base_folder = f'/{ya_base_folder}'
         status_base_folder = requests.get(url, headers=self.headers, params={'path': base_folder}).status_code
         if status_base_folder == 404:
             requests.put(url, headers=self.headers, params={'path': base_folder})
@@ -28,8 +28,8 @@ class YandexDisk:
         response.raise_for_status()
         return path
 
-    def upload_files_to_disk(self, photos: list[dict], vk_owner_id: int, upload_log: bool):
-        path = self._create_folder(vk_owner_id)
+    def upload_files_to_disk(self, photos: list[dict], vk_owner_id: int, upload_log: bool, ya_base_folder: str) -> None:
+        path = self._create_folder(vk_owner_id, ya_base_folder)
         url = self._base_url + 'resources/upload'
         pbar = tqdm(photos, ncols=100)
         for photo in pbar:
